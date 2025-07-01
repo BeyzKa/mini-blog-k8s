@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service #Service, which exposes your pod(s) to the network.
+metadata:
+  name: frontend
+  namespace: blog-project
+spec:
+  type: NodePort #expose your application outside the Kubernetes cluster
+  selector:
+    app: frontend #This connects the Service to the pod(s) labeled app: frontend.
+  ports:
+    - port: 80        #The port exposed by the Service inside the cluster (used by other pods).
+      targetPort: 80  #The port on the container where traffic should be sent (Nginx listens on 80).
+      nodePort: 30080 #The external port on the Node that users can access (e.g., http://<NodeIP>:30080).
+
+#You’ll be able to access your app via the IP of any node + the nodePort.

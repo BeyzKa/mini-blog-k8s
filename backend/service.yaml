@@ -1,0 +1,32 @@
+apiVersion: v1   #backend service networt 
+kind: Service    #creating a Service object (for networking)
+metadata:
+  name: backend              #Other pods can access this service using http://backend:3000.
+  namespace: blog-project
+spec:
+  selector:
+    app: backend       #This service targets all pods with the label app: backend.
+  ports: #port mappimg
+    - protocol: TCP
+      port: 3000  #The service's internal port (used by other pods)
+      targetPort: 3000  # actual port my container listens on (Express app runs on 3000))
+      nodePort: 30001  # External port to expose this service outside the cluster (must be in range 30000–32767)
+  type: NodePort  #This means the service is exposed outside the cluster on the specified nodePort.
+
+
+#it lets the other pods (like frontend)to access backend
+
+#http://backend:3000 -> access from this
+
+
+
+
+
+
+
+
+#You can access it from your browser or Postman using:
+#http://<Node-IP>:30001
+
+#If you're using Minikube, you can get this URL easily:
+#minikube service backend --url

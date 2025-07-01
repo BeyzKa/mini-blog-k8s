@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: blog-project
+spec:
+  replicas: 1 #if i make this 3, i would have 3 same pod running
+  selector:
+    matchLabels:
+      app: frontend #frontend pods matches with the frontend deployment
+  template:
+    metadata:
+      labels:
+        app: frontend #pods label
+    spec:
+      containers: #defining container in thepod
+      - name: frontend #container name
+        image: nginx:alpine #used docker image: nginx:alpine
+        ports:
+        - containerPort: 80 #nginx default port
+        volumeMounts: # connecting file system into pod
+        - name: html
+          mountPath: /usr/share/nginx/html #outer source will come to this path, nginx will look for html files here
+      volumes: #source defining
+      - name: html
+        configMap: #have some files like index.html...
+          name: frontend-html
+
+# When the pod starts, Nginx can directly find the HTML files in the mounted directory.
+# This means you don’t need to bake HTML files into the Docker image.
+# To update the HTML content, you only need to update the ConfigMap.
+
+#💡 What is the benefit?
+
+#Static frontend files can be easily deployed.
+#HTML content can be changed without modifying the code.
+#No need to rebuild the Docker image every time → very useful for development and testing environments.
+#Multiple pods can share the same ConfigMap → ensures consistency across pods.
+
+# Nginx's role:
+# Nginx automatically serves(out as http) HTML files placed in a specific directory as a web server (this feature is one of the reasons it is widely used).
+
+# Kubernetes's Role:
+# Kubernetes turns a ConfigMap into a volume.
+# It then mounts this volume into Nginx’s directory.

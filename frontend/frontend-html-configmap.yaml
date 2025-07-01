@@ -1,0 +1,353 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-html
+  namespace: blog-project
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="tr">
+    <head>
+      <meta charset="UTF-8">
+      <title>📝 Mini Blog</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          margin: 0;
+          padding: 40px;
+          min-height: 100vh;
+        }
+
+        .container {
+          max-width: 800px;
+          margin: 0 auto;
+          background: white;
+          border-radius: 15px;
+          padding: 30px;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+          color: #333;
+          text-align: center;
+          margin-bottom: 30px;
+          font-size: 2.5em;
+        }
+
+        form {
+          margin-bottom: 30px;
+          background: #f8f9fa;
+          padding: 20px;
+          border-radius: 10px;
+          border: 1px solid #e9ecef;
+        }
+
+        input, textarea {
+          width: 100%;
+          padding: 12px;
+          margin: 10px 0;
+          border: 2px solid #ddd;
+          border-radius: 8px;
+          font-size: 16px;
+          transition: border-color 0.3s ease;
+          box-sizing: border-box;
+        }
+
+        input:focus, textarea:focus {
+          outline: none;
+          border-color: #667eea;
+          box-shadow: 0 0 10px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+          height: 120px;
+          resize: vertical;
+        }
+
+        button {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 12px 24px;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 16px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+        }
+
+        button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-delete {
+          background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+          padding: 6px 12px;
+          font-size: 12px;
+          margin-left: 10px;
+        }
+
+        .btn-delete:hover {
+          background: linear-gradient(135deg, #ff5252 0%, #d84315 100%);
+          box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .posts-section {
+          margin-top: 30px;
+        }
+
+        .posts-section h2 {
+          color: #333;
+          border-bottom: 3px solid #667eea;
+          padding-bottom: 10px;
+          margin-bottom: 20px;
+        }
+
+        .post {
+          background: white;
+          padding: 20px;
+          margin-top: 15px;
+          border-radius: 10px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          border-left: 4px solid #667eea;
+          transition: all 0.3s ease;
+        }
+
+        .post:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .post h3 {
+          margin: 0 0 10px;
+          color: #333;
+          font-size: 1.4em;
+        }
+
+        .post p {
+          margin: 10px 0;
+          line-height: 1.6;
+          color: #555;
+          white-space: pre-wrap;
+        }
+
+        .post-meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 15px;
+          padding-top: 10px;
+          border-top: 1px solid #eee;
+          color: #888;
+          font-size: 0.9em;
+        }
+
+        .post-info {
+          display: flex;
+          gap: 15px;
+          align-items: center;
+        }
+
+        .post-id {
+          background: #f1f3f4;
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-size: 11px;
+          color: #666;
+        }
+
+        .loading {
+          text-align: center;
+          color: #666;
+          font-style: italic;
+          padding: 40px;
+        }
+
+        .error {
+          background: #f8d7da;
+          color: #721c24;
+          padding: 15px;
+          border-radius: 8px;
+          margin: 20px 0;
+          border: 1px solid #f5c6cb;
+        }
+
+        .success {
+          background: #d4edda;
+          color: #155724;
+          padding: 15px;
+          border-radius: 8px;
+          margin: 20px 0;
+          border: 1px solid #c3e6cb;
+        }
+
+        @media (max-width: 768px) {
+          .container {
+            padding: 20px;
+            margin: 20px;
+          }
+          
+          .post-meta {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>📝 Mini Blog</h1>
+
+        <form id="postForm">
+          <input type="text" id="title" placeholder="Başlık" required />
+          <textarea id="content" placeholder="İçerik" required></textarea>
+          <button type="submit">📝 Yazıyı Paylaş</button>
+        </form>
+
+        <div class="posts-section">
+          <h2>📚 Blog Yazıları</h2>
+          <div id="posts">
+            <div class="loading">📖 Yazılar yükleniyor...</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        // Backend URL - localhost:3000 (port-forward ile)
+        const BACKEND_URL = 'http://localhost:3000';
+
+        async function fetchPosts() {
+          try {
+            const res = await fetch(`${BACKEND_URL}/api/posts`);
+            
+            if (!res.ok) {
+              throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            }
+            
+            const posts = await res.json();
+            const container = document.getElementById('posts');
+            
+            if (posts.length === 0) {
+              container.innerHTML = '<div class="loading">📝 Henüz hiç yazı yok. İlk yazıyı siz yazın!</div>';
+              return;
+            }
+            
+            container.innerHTML = '';
+
+            posts.forEach(post => {
+              const div = document.createElement('div');
+              div.className = 'post';
+              div.innerHTML = `
+                <h3>${escapeHtml(post.title)}</h3>
+                <p>${escapeHtml(post.content)}</p>
+                <div class="post-meta">
+                  <div class="post-info">
+                    <span class="post-id">ID: ${post.id}</span>
+                    <span>📅 ${new Date(post.created_at).toLocaleString('tr-TR')}</span>
+                  </div>
+                  <button class="btn-delete" onclick="deletePost(${post.id}, '${escapeHtml(post.title)}')">
+                    🗑️ Sil
+                  </button>
+                </div>
+              `;
+              container.appendChild(div);
+            });
+          } catch (error) {
+            console.error('Error fetching posts:', error);
+            document.getElementById('posts').innerHTML = 
+              `<div class="error">❌ Yazılar yüklenirken hata oluştu: ${error.message}<br><strong>Backend port-forward yapıldığından emin olun!</strong></div>`;
+          }
+        }
+
+        // ✅ YENİ EKLENEN: Yazı silme fonksiyonu
+        async function deletePost(postId, postTitle) {
+          if (!confirm(`"${postTitle}" yazısını silmek istediğinizden emin misiniz?\\n\\nBu işlem geri alınamaz!`)) {
+            return;
+          }
+          
+          try {
+            const response = await fetch(`${BACKEND_URL}/api/posts/${postId}`, {
+              method: 'DELETE'
+            });
+            
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || 'Yazı silinirken hata oluştu');
+            }
+            
+            const result = await response.json();
+            showMessage(`🗑️ "${result.deleted_post.title}" başlıklı yazı başarıyla silindi!`, 'success');
+            fetchPosts(); // Yazıları yeniden yükle
+            
+          } catch (error) {
+            console.error('Error deleting post:', error);
+            showMessage(`❌ Silme hatası: ${error.message}`, 'error');
+          }
+        }
+
+        function showMessage(message, type = 'success') {
+          const existingMessage = document.querySelector('.success, .error');
+          if (existingMessage && !existingMessage.closest('.posts-section')) {
+            existingMessage.remove();
+          }
+          
+          const messageDiv = document.createElement('div');
+          messageDiv.className = type;
+          messageDiv.textContent = message;
+          
+          const form = document.getElementById('postForm');
+          form.parentNode.insertBefore(messageDiv, form.nextSibling);
+          
+          setTimeout(() => {
+            if (messageDiv.parentNode) {
+              messageDiv.remove();
+            }
+          }, 5000);
+        }
+
+        function escapeHtml(text) {
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+        }
+
+        document.getElementById('postForm').addEventListener('submit', async e => {
+          e.preventDefault();
+          const title = document.getElementById('title').value.trim();
+          const content = document.getElementById('content').value.trim();
+
+          if (!title || !content) {
+            showMessage('Lütfen başlık ve içerik alanlarını doldurun!', 'error');
+            return;
+          }
+
+          try {
+            const response = await fetch(`${BACKEND_URL}/api/posts`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ title, content })
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || 'Yazı eklenirken hata oluştu');
+            }
+
+            document.getElementById('title').value = '';
+            document.getElementById('content').value = '';
+            showMessage('🎉 Yazı başarıyla paylaşıldı!', 'success');
+            fetchPosts(); // Yeniden yükle
+          } catch (error) {
+            console.error('Error posting:', error);
+            showMessage(`❌ Hata: ${error.message}`, 'error');
+          }
+        });
+
+        // Sayfa yüklendiğinde yazıları getir
+        document.addEventListener('DOMContentLoaded', fetchPosts);
+      </script>
+    </body>
+    </html>

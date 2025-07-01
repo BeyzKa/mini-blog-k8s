@@ -1,0 +1,13 @@
+node_modules
+*.yaml
+*.yml
+.git
+.gitignore
+README.md
+.env
+.env.local
+Dockerfile
+.dockerignore
+
+# while docker build these files will not be included to build
+# Only index.js and package.json are included

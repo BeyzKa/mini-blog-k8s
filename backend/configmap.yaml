@@ -1,0 +1,10 @@
+#Backend config
+apiVersion: v1         
+kind: ConfigMap           #Type of kubernetes resource,The type of Kubernetes object.
+metadata:
+  name: backend-config    #Name of the config-map
+  namespace: blog-project
+data:
+  DB_HOST: postgres       # The hostname of the database. In this case, it's referring to a Kubernetes service named postgres.
+  DB_NAME: postgres       # The name of the PostgreSQL database being used.
+  PORT: "3000"            # Express.js port,The port on which the backend application (likely Express.js) will run.

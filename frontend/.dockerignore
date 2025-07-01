@@ -1,0 +1,12 @@
+*.yaml
+*.yml
+.git
+.gitignore
+README.md
+node_modules
+.env
+.env.local
+Dockerfile
+.dockerignore
+
+#Only index.html file is included for docker build

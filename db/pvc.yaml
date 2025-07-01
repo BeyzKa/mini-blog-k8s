@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: PersistentVolumeClaim  #This object is a PersistentVolumeClaim (PVC), which asks Kubernetes for some persistent disk space.
+metadata:
+  name: postgres-pvc
+  namespace: blog-project
+  labels:
+    app: postgres
+spec:
+  accessModes:      #This defines how the volume can be accessed:
+    - ReadWriteOnce #ReadWriteOnce: The volume can be mounted as read/write by only one pod at a time (typical for PostgreSQL).
+  resources:
+    requests:
+      storage: 1Gi #This requests 1 GiB of storage.
+
+
+#Kubernetes will look for or create a PersistentVolume (PV) that can fulfill this request.
+
+#Pods can be restarted or recreated, and when that happens, any data stored inside the pod is lost (ephemeral).
+# To prevent data loss, we need persistent storage. This is where PVC (Persistent Volume Claim) comes in 
+#it lets the pod use disk space that remains even if the pod is deleted or restarted.

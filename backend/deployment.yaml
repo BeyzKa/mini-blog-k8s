@@ -1,0 +1,74 @@
+
+apiVersion: apps/v1 # backend podlarının kubernetes deploy ayarları
+kind: Deployment    #The type of Kubernetes object – a Deployment to manage pods.
+metadata:
+  name: backend
+  namespace: blog-project  #namespace: It runs inside the blog-project namespace to organize resources.
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend #This tells Kubernetes how to identify which pods belong to this Deployment. It matches pods with label app: backend.
+  template:
+    metadata:
+      labels:
+        app: backend  #These labels are applied to the pods created by the Deployment.
+    spec:
+      containers:
+        - name: backend
+          image: blog-backend           #  Docker image name
+          imagePullPolicy: IfNotPresent        # IfNotPresent: Use a local image if available, otherwise pull from registry.
+          ports:
+            - containerPort: 3000 #The container exposes port 3000, which is where the Express.js app listens.
+
+          env:   #These env entries pull environment variables from ConfigMaps and Secrets:
+            # 🌐 DB address (exmpl: postgres service name)
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config         # Gets DB_HOST from the backend-config ConfigMap.
+                  key: DB_HOST
+
+            # 📦 Gets the database name from the same ConfigMap.
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: DB_NAME
+
+            # 👤 DB user name
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+                                                  #These two get sensitive credentials (username and password) from a Secret called postgres-secret.
+            # 🔐 DB password
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+
+            # 🌐 Gets the port number (3000) from the ConfigMap.
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: PORT
+
+          # 🩺 Kubernetes uses probes to check if your application is running correctly.
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          # Used to determine when the pod is ready to receive traffic.
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5

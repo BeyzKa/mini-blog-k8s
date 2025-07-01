@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: blog-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15 #Uses the official PostgreSQL 15 Docker image.
+          ports:
+            - containerPort: 5432  #Exposes port 5432 (PostgreSQL's default port) inside the pod, so other containers in the pod or services can connect to it.
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+          volumeMounts: # (persistent storage)
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data #This is where PostgreSQL stores its data files.
+              #So even if the pod is deleted, data is not lost — because it's on a PersistentVolume.
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc  #The PVC ensures that data is stored on durable storage (like disk or cloud volume), not just in memory.
