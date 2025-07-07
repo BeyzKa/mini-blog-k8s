@@ -24,7 +24,7 @@ This project is a simple **blog sharing platform** where users can create, view,
 minikube start --driver=docker
 
 # Use Minikube’s Docker daemon
-eval $(minikube docker-env)
+& minikube -p minikube docker-env | Invoke-Expression
 ```
 
 > ⚠️ This ensures Docker images you build are available inside the Minikube cluster.
