@@ -10,4 +10,3 @@ data:
   PORT: "3000"            # Express.js port,The port on which the backend application (likely Express.js) will run.
 
 
-#aynı imajı farklı ortamlarda kullanabilmek,değişim yapıldığında imajın sabit kalması, kolay güncellenebilir olması gibi yararları var.
