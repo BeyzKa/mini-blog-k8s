@@ -20,8 +20,16 @@ spec:
 
 
 
-
-
+# Actual request flow:
+# Browser/Postman sends a request to http://localhost:30001
+# ↓
+# The request reaches the Minikube Node at NodePort 30001
+# ↓
+# NodePort forwards the request to the Service's port: 3000 (inside the cluster)
+# ↓
+# The Service routes the request to the Pod's targetPort: 3000
+# ↓
+# The container (e.g., Express.js app) receives the request and sends a response
 
 
 

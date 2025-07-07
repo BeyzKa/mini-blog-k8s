@@ -26,7 +26,7 @@ minikube start --driver=docker
 # Use Minikube’s Docker daemon
 & minikube -p minikube docker-env | Invoke-Expression
 ```
-
+> On windows
 > ⚠️ This ensures Docker images you build are available inside the Minikube cluster.
 
 ### 0.1 Build the Backend Docker Image

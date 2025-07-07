@@ -8,3 +8,6 @@ data:
   DB_HOST: postgres       # The hostname of the database. In this case, it's referring to a Kubernetes service named postgres.
   DB_NAME: postgres       # The name of the PostgreSQL database being used.
   PORT: "3000"            # Express.js port,The port on which the backend application (likely Express.js) will run.
+
+
+#aynı imajı farklı ortamlarda kullanabilmek,değişim yapıldığında imajın sabit kalması, kolay güncellenebilir olması gibi yararları var.
